@@ -1,4 +1,4 @@
-// Serverless function (Vercel). Keeps your API key secret on the server.
+
 const syllabus = require("../data/syllabus.json");
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
   if (!process.env.GEMINI_API_KEY)
     return res.status(500).json({ error: "Server is missing GEMINI_API_KEY." });
 
-  const messages = Array.isArray(req.body?.messages) ? req.body.messages.slice(-10) : [];
+  const messages = Array.isArray(req.body && req.body.messages) ? req.body.messages.slice(-10) : [];
   const last = messages[messages.length - 1];
   if (!last || last.role !== "user" || !last.text)
     return res.status(400).json({ error: "No question received." });
@@ -65,16 +65,21 @@ module.exports = async (req, res) => {
         body: JSON.stringify(body),
       }
     );
+    const data = await r.json();
     if (r.status === 429)
       return res.status(429).json({ error: "Too many students right now. Try again in a minute." });
-    const data = await r.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "";
-    if (!r.ok || !reply)
+    const reply =
+      (data.candidates && data.candidates[0] && data.candidates[0].content &&
+        data.candidates[0].content.parts &&
+        data.candidates[0].content.parts.map((p) => p.text).join("")) || "";
+    if (!r.ok || !reply) {
       console.error("Gemini error", r.status, JSON.stringify(data));
-      return res.status(502).json({ error: "The tutor could not answer. (Google says: " + (data?.error?.message || "empty reply") + ")" });
+      const why = (data.error && data.error.message) || "empty reply";
+      return res.status(502).json({ error: "The tutor could not answer. (Google says: " + why + ")" });
     }
     res.status(200).json({ reply });
   } catch (e) {
-    res.status(502).json({ error: "Network problem. Check your connection and retry." });
+    console.error("Function error", e);
+    res.status(502).json({ error: "Server error: " + e.message });
   }
 };
