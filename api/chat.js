@@ -70,7 +70,9 @@ module.exports = async (req, res) => {
     const data = await r.json();
     const reply = data?.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "";
     if (!r.ok || !reply)
-      return res.status(502).json({ error: "The tutor could not answer. Please try again." });
+      console.error("Gemini error", r.status, JSON.stringify(data));
+      return res.status(502).json({ error: "The tutor could not answer. (Google says: " + (data?.error?.message || "empty reply") + ")" });
+    }
     res.status(200).json({ reply });
   } catch (e) {
     res.status(502).json({ error: "Network problem. Check your connection and retry." });
