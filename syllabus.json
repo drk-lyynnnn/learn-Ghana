@@ -1,0 +1,26 @@
+[
+  {
+    "subject": "Core Mathematics",
+    "topic": "Number and Numeration: Fractions, Decimals, Percentages",
+    "keywords": ["fraction", "decimal", "percentage", "percent", "ratio", "simplify"],
+    "text": "SAMPLE PLACEHOLDER. Replace with official WAEC/GES syllabus wording. Convert between fractions, decimals and percentages. To find a percentage of a quantity, multiply the quantity by the percentage over 100. Always show each step of working."
+  },
+  {
+    "subject": "Core Mathematics",
+    "topic": "Algebraic Processes: Linear Equations",
+    "keywords": ["equation", "solve", "linear", "algebra", "unknown", "simultaneous"],
+    "text": "SAMPLE PLACEHOLDER. Replace with official content. To solve a linear equation, do the same operation to both sides until the unknown stands alone. Check the answer by substituting it back into the original equation."
+  },
+  {
+    "subject": "Core Mathematics",
+    "topic": "Geometry and Trigonometry: Pythagoras and Right-Angled Triangles",
+    "keywords": ["pythagoras", "triangle", "hypotenuse", "sine", "cosine", "tangent", "trigonometry"],
+    "text": "SAMPLE PLACEHOLDER. Replace with official content. In a right-angled triangle, hypotenuse squared equals the sum of the squares of the other two sides. SOH CAH TOA relates the sides to an angle."
+  },
+  {
+    "subject": "Core Mathematics",
+    "topic": "Statistics and Probability: Mean, Median, Mode",
+    "keywords": ["mean", "median", "mode", "average", "probability", "data", "frequency"],
+    "text": "SAMPLE PLACEHOLDER. Replace with official content. Mean is the sum of values divided by the number of values. Median is the middle value when ordered. Mode is the most frequent value. Probability = favourable outcomes / total outcomes."
+  }
+]
