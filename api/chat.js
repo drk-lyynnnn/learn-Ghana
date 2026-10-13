@@ -1,7 +1,6 @@
-
 const syllabus = require("../data/syllabus.json");
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
 const SYSTEM_PROMPT = `You are a patient study tutor for students in Ghana preparing for BECE and WASSCE (WAEC), following the GES syllabus.
 Rules:
@@ -32,6 +31,25 @@ function retrieve(question, k = 3) {
     .map((x) => `[${x.c.subject}: ${x.c.topic}]\n${x.c.text}`);
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Calls Gemini and retries when Google says it is busy (503 / 500).
+async function callGemini(body) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+  let r, data;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
+      body: JSON.stringify(body),
+    });
+    data = await r.json();
+    if (r.status !== 503 && r.status !== 500) break;
+    await sleep(1200 * (attempt + 1));
+  }
+  return { r, data };
+}
+
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   if (!process.env.GEMINI_API_KEY)
@@ -57,17 +75,11 @@ module.exports = async (req, res) => {
   };
 
   try {
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
-        body: JSON.stringify(body),
-      }
-    );
-    const data = await r.json();
+    const { r, data } = await callGemini(body);
     if (r.status === 429)
       return res.status(429).json({ error: "Too many students right now. Try again in a minute." });
+    if (r.status === 503)
+      return res.status(503).json({ error: "Vile AI is very busy right now. Please try again in a moment." });
     const reply =
       (data.candidates && data.candidates[0] && data.candidates[0].content &&
         data.candidates[0].content.parts &&
